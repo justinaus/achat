@@ -25,8 +25,7 @@ class Room extends Component<RouteComponentProps, IState> {
 
   constructor( props: RouteComponentProps  ) {
     super( props );
-
-    this.socket = io.connect( this.endpoint );
+    
     this.refForm = React.createRef();
 
     const locationState: IRoom = this.props.location.state;
@@ -38,6 +37,8 @@ class Room extends Component<RouteComponentProps, IState> {
 
     const params: any = this.props.match.params;
     const id: string = params.id;
+
+    this.socket = io.connect( this.endpoint + '/' + id );
 
     if( !locationState ) {
       this.getData( id );
