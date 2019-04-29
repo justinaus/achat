@@ -13,6 +13,7 @@ interface IChatMsg {
 }
 
 interface IState {
+  roomData: IRoom,
   chatList: Array<IChatMsg>
 }
 
@@ -30,11 +31,36 @@ class Room extends Component<RouteComponentProps, IState> {
 
     const locationState: IRoom = this.props.location.state;
 
-    console.log( locationState );
-
     this.state = {
+      roomData: locationState,
       chatList: []
     }
+
+    const params: any = this.props.match.params;
+    const id: string = params.id;
+
+    if( !locationState ) {
+      this.getData( id );
+    }
+  }
+
+  getData = ( id: string ) => {
+    const TEMP_URL: string = 'https://my-json-server.typicode.com/justinaus/achat/rooms';
+
+    fetch( TEMP_URL )
+    .then( ( response ) => {
+      return response.json();
+    } ).then( ( data: Array<any> ) => {
+      const roomData: IRoom = data.find( ( item: any ) => {
+        return String( item.id ) === id
+      } );
+
+      this.setState( {
+        roomData: roomData
+      } );
+    } ).catch( ( error ) => {
+      console.log( error );
+    } );
   }
 
   componentDidMount() {
@@ -116,10 +142,13 @@ class Room extends Component<RouteComponentProps, IState> {
   }
 
   render() {
-    const chatList = this.state.chatList;
+    const { chatList, roomData } = this.state;
+
+    const title: string = roomData ? roomData.title : '';
 
     return (
       <div>
+        <h3>{ title }</h3>
         <InputGroup className="mb-3" id='igChat'>
           <FormControl
             placeholder="Chat" ref={ this.refForm }

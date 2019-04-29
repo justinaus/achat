@@ -34,7 +34,7 @@ class RoomList extends Component<RouteComponentProps, IState> {
   }
 
   onClickItem = ( roomData: IRoom ) => {
-    this.props.history.push( '/room', roomData );
+    this.props.history.push( '/room/' + roomData.id, roomData );
   }
 
   renderRoomItem = ( roomData: IRoom ) => {
