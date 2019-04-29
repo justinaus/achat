@@ -1,11 +1,14 @@
 const express = require('express')
 const http = require('http')
 const socketIO = require('socket.io')
+const cors = require('cors');
 
 // our localhost port
 const port = 4001
 
 const app = express()
+
+app.use(cors());
 
 // our server instance
 const server = http.createServer(app)
@@ -52,5 +55,17 @@ function connectByNamespace( nsp ) {
     } );
   })
 }
+
+app.get('/rooms', (req, res) => {
+  return res.json(rooms);
+});
+
+app.get('/room/:id', (req, res) => {
+  const room = rooms.find( ( item ) => {
+    return String( item.id ) === String( req.params.id )
+  } );
+
+  return res.json(room);
+});
 
 server.listen(port, () => console.log(`Listening on port ${port}`))

@@ -46,18 +46,14 @@ class Room extends Component<RouteComponentProps, IState> {
   }
 
   getData = ( id: string ) => {
-    const TEMP_URL: string = 'https://my-json-server.typicode.com/justinaus/achat/rooms';
+    const TEMP_URL: string = 'http://localhost:4001/room/' + id;
 
     fetch( TEMP_URL )
     .then( ( response ) => {
       return response.json();
-    } ).then( ( data: Array<any> ) => {
-      const roomData: IRoom = data.find( ( item: any ) => {
-        return String( item.id ) === id
-      } );
-
+    } ).then( ( data: any ) => {
       this.setState( {
-        roomData: roomData
+        roomData: data
       } );
     } ).catch( ( error ) => {
       console.log( error );

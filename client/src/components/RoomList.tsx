@@ -19,7 +19,7 @@ class RoomList extends Component<RouteComponentProps, IState> {
   }
 
   getData = () => {
-    const TEMP_URL: string = 'https://my-json-server.typicode.com/justinaus/achat/rooms';
+    const TEMP_URL: string = 'http://localhost:4001/rooms';
 
     fetch( TEMP_URL )
     .then( ( response ) => {
