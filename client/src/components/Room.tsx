@@ -18,8 +18,6 @@ interface IState {
 }
 
 class Room extends Component<RouteComponentProps, IState> {
-  endpoint: string = 'localhost:4001';
-
   socket: SocketIOClient.Socket;
   refForm: RefObject<any>;
 
@@ -38,7 +36,10 @@ class Room extends Component<RouteComponentProps, IState> {
     const params: any = this.props.match.params;
     const id: string = params.id;
 
-    this.socket = io.connect( this.endpoint + '/' + id );
+    const ENV_HOST: string | undefined = process.env.REACT_APP_TEMP_HOST;
+    const HOST: string = ENV_HOST ? ENV_HOST : 'localhost:4001';
+    
+    this.socket = io.connect( HOST + '/' + id );
 
     if( !locationState ) {
       this.getData( id );

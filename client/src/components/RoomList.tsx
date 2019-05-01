@@ -19,9 +19,11 @@ class RoomList extends Component<RouteComponentProps, IState> {
   }
 
   getData = () => {
-    const TEMP_URL: string = 'http://localhost:4001/rooms';
+    const ENV_HOST: string | undefined = process.env.REACT_APP_TEMP_HOST;
+    const HOST: string = ENV_HOST ? ENV_HOST : 'localhost:4001';
+    const URL: string = `http://${HOST}/rooms`;
 
-    fetch( TEMP_URL )
+    fetch( URL )
     .then( ( response ) => {
       return response.json();
     } ).then( ( data ) => {
