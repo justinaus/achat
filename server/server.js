@@ -13,9 +13,6 @@ app.use(cors());
 // our server instance
 const server = http.createServer(app)
 
-// This creates our socket using the instance of the server
-const io = socketIO(server);
-
 const rooms = [
   {
     "id": 1,
@@ -35,23 +32,48 @@ const rooms = [
   }
 ];
 
-for(var i=0; i<rooms.length; ++i) {
-  const nsp = io.of( '/' + rooms[ i ].id );
-  connectByNamespace( nsp );
-}
+// This creates our socket using the instance of the server
+const io = socketIO(server);
 
-function connectByNamespace( nsp ) {
-  // This is what the socket.io syntax is like, we will work this later
+connectSocket( io );
+
+function connectSocket( nsp ) {
   nsp.on('connection', socket => {
-    socket.broadcast.emit( 'GUEST_CONNECTED', 'a guest connected' );
+    // socket.broadcast.emit( 'GUEST_CONNECTED', 'a guest connected' );
 
-    socket.on( 'MESSAGE_FROM_CLIENT', ( msg ) => {
-      socket.emit('MY_MESSAGE_FROM_SERVER', msg);
-      socket.broadcast.emit( 'OTHERS_MESSAGE_FROM_SERVER', msg );
-    } );
+    let currentRoomId = null;
+    let currentUserName = null;
 
     socket.on( 'disconnect', () => {
-      socket.broadcast.emit( 'GUEST_DISCONNECTED', 'a guest disconnected' );
+      if( currentRoomId && currentUserName ) {
+        io.to( currentRoomId ).emit('GUEST_DISCONNECTED', currentUserName);
+      }
+      
+      // socket.broadcast.emit( 'GUEST_DISCONNECTED', 'a guest disconnected' );
+    } );
+
+    socket.on('JOIN_ROOM', ( roomId, userName) => {
+      const roomData = rooms.find( ( item ) => {
+        return String( item.id ) === String( roomId );
+      } );
+
+      if( !roomData ) {
+        socket.emit('ERROR', 'wrong room');
+        return;
+      }
+
+      socket.join( roomId, () => {
+        currentRoomId = roomId;
+        currentUserName = userName;
+
+        io.to( roomId ).emit('GUEST_CONNECTED', userName);
+      });
+    });
+
+    socket.on( 'MESSAGE_FROM_CLIENT', ( roomId, msg ) => {
+      socket.emit('MY_MESSAGE_FROM_SERVER', msg);
+      socket.broadcast.to(roomId).emit('OTHERS_MESSAGE_FROM_SERVER', msg)
+      // socket.broadcast.emit( 'OTHERS_MESSAGE_FROM_SERVER', msg );
     } );
   })
 }

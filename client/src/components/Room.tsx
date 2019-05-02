@@ -17,11 +17,16 @@ interface IState {
   chatList: Array<IChatMsg>
 }
 
-class Room extends Component<RouteComponentProps, IState> {
+interface IProps extends RouteComponentProps {
+  userName: string
+}
+
+class Room extends Component<IProps, IState> {
   socket: SocketIOClient.Socket;
   refForm: RefObject<any>;
-
-  constructor( props: RouteComponentProps  ) {
+  roomId: string;
+  
+  constructor( props: IProps ) {
     super( props );
     
     this.refForm = React.createRef();
@@ -34,20 +39,22 @@ class Room extends Component<RouteComponentProps, IState> {
     }
 
     const params: any = this.props.match.params;
-    const id: string = params.id;
-
+    this.roomId = params.id;
+    
     const ENV_HOST: string | undefined = process.env.REACT_APP_TEMP_HOST;
     const HOST: string = ENV_HOST ? ENV_HOST : 'localhost:4001';
     
-    this.socket = io.connect( HOST + '/' + id );
+    this.socket = io.connect( HOST );
+
+    this.socket.emit( ChatEvent.JOIN_ROOM, this.roomId, this.props.userName);
 
     if( !locationState ) {
-      this.getData( id );
+      this.getData( this.roomId );
     }
   }
 
-  getData = ( id: string ) => {
-    const TEMP_URL: string = 'http://localhost:4001/room/' + id;
+  getData = ( roomId: string ) => {
+    const TEMP_URL: string = 'http://localhost:4001/room/' + roomId;
 
     fetch( TEMP_URL )
     .then( ( response ) => {
@@ -68,7 +75,7 @@ class Room extends Component<RouteComponentProps, IState> {
   addSocketEvent = () => {
     this.socket.on( ChatEvent.GUEST_CONNECTED, ( msg: string ) => {
       const chat: IChatMsg = {
-        text: msg,
+        text: msg + ' connected',
         isMyChat: false,
         isNotice: true
       }
@@ -78,7 +85,7 @@ class Room extends Component<RouteComponentProps, IState> {
 
     this.socket.on( ChatEvent.GUEST_DISCONNECTED, ( msg: string ) => {
       const chat: IChatMsg = {
-        text: msg,
+        text: msg + ' disconnected',
         isMyChat: false,
         isNotice: true
       }
@@ -105,6 +112,10 @@ class Room extends Component<RouteComponentProps, IState> {
 
       this.addChat( chat );
     } );
+
+    this.socket.on( ChatEvent.ERROR, ( msg: string ) => {
+      alert( msg );
+    } );
   }
 
   addChat = ( chat: IChatMsg ) => {
@@ -118,7 +129,7 @@ class Room extends Component<RouteComponentProps, IState> {
   onClickSend = () => {
     const currentText: string = this.refForm.current.value;
 
-    this.socket.emit( ChatEvent.MESSAGE_FROM_CLIENT, currentText );
+    this.socket.emit( ChatEvent.MESSAGE_FROM_CLIENT, this.roomId, currentText );
 
     this.refForm.current.value = '';
   }
@@ -141,12 +152,14 @@ class Room extends Component<RouteComponentProps, IState> {
 
   render() {
     const { chatList, roomData } = this.state;
+    const { userName } = this.props; 
 
     const title: string = roomData ? roomData.title : '';
 
     return (
       <div>
         <h3>{ title }</h3>
+        <h5>my name: { userName }</h5>
         <InputGroup className="mb-3" id='igChat'>
           <FormControl
             placeholder="Chat" ref={ this.refForm }
