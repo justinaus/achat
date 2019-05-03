@@ -44,14 +44,6 @@ function connectSocket( nsp ) {
     let currentRoomId = null;
     let currentUserName = null;
 
-    socket.on( 'disconnect', () => {
-      if( currentRoomId && currentUserName ) {
-        io.to( currentRoomId ).emit('GUEST_DISCONNECTED', currentUserName);
-      }
-      
-      // socket.broadcast.emit( 'GUEST_DISCONNECTED', 'a guest disconnected' );
-    } );
-
     socket.on('JOIN_ROOM', ( roomId, userName) => {
       const roomData = rooms.find( ( item ) => {
         return String( item.id ) === String( roomId );
@@ -66,14 +58,21 @@ function connectSocket( nsp ) {
         currentRoomId = roomId;
         currentUserName = userName;
 
-        io.to( roomId ).emit('GUEST_CONNECTED', userName);
+        io.to( currentRoomId ).emit('GUEST_CONNECTED', currentUserName);
       });
     });
 
-    socket.on( 'MESSAGE_FROM_CLIENT', ( roomId, msg ) => {
-      socket.emit('MY_MESSAGE_FROM_SERVER', msg);
-      socket.broadcast.to(roomId).emit('OTHERS_MESSAGE_FROM_SERVER', msg)
-      // socket.broadcast.emit( 'OTHERS_MESSAGE_FROM_SERVER', msg );
+    socket.on( 'disconnect', () => {
+      if( !currentRoomId || !currentUserName )  return;
+      
+      io.to( currentRoomId ).emit('GUEST_DISCONNECTED', currentUserName);
+    } );
+
+    socket.on( 'MESSAGE_FROM_CLIENT', ( msg ) => {
+      if( !currentRoomId || !currentUserName )  return;
+
+      socket.emit('MY_MESSAGE_FROM_SERVER', currentUserName, msg);
+      socket.broadcast.to(currentRoomId).emit('OTHERS_MESSAGE_FROM_SERVER', currentUserName, msg);
     } );
   })
 }

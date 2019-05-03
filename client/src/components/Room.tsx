@@ -73,9 +73,9 @@ class Room extends Component<IProps, IState> {
   }
 
   addSocketEvent = () => {
-    this.socket.on( ChatEvent.GUEST_CONNECTED, ( msg: string ) => {
+    this.socket.on( ChatEvent.GUEST_CONNECTED, ( userName: string ) => {
       const chat: IChatMsg = {
-        text: msg + ' connected',
+        text: userName + ' connected',
         isMyChat: false,
         isNotice: true
       }
@@ -83,9 +83,9 @@ class Room extends Component<IProps, IState> {
       this.addChat( chat );
     } );
 
-    this.socket.on( ChatEvent.GUEST_DISCONNECTED, ( msg: string ) => {
+    this.socket.on( ChatEvent.GUEST_DISCONNECTED, ( userName: string ) => {
       const chat: IChatMsg = {
-        text: msg + ' disconnected',
+        text: userName + ' disconnected',
         isMyChat: false,
         isNotice: true
       }
@@ -93,9 +93,9 @@ class Room extends Component<IProps, IState> {
       this.addChat( chat );
     } );
 
-    this.socket.on( ChatEvent.MY_MESSAGE_FROM_SERVER, ( msg: string ) => {
+    this.socket.on( ChatEvent.MY_MESSAGE_FROM_SERVER, ( userName:string, msg: string ) => {
       const chat: IChatMsg = {
-        text: msg,
+        text: userName + ': ' + msg,
         isMyChat: true,
         isNotice: false
       }
@@ -103,9 +103,9 @@ class Room extends Component<IProps, IState> {
       this.addChat( chat );
     } );
 
-    this.socket.on( ChatEvent.OTHERS_MESSAGE_FROM_SERVER, ( msg: string ) => {
+    this.socket.on( ChatEvent.OTHERS_MESSAGE_FROM_SERVER, ( userName:string, msg: string ) => {
       const chat: IChatMsg = {
-        text: msg,
+        text: userName + ': ' + msg,
         isMyChat: false,
         isNotice: false
       }
@@ -126,10 +126,6 @@ class Room extends Component<IProps, IState> {
     } );
   }
 
-  onClickSend = () => {
-    this.sendMsg();
-  }
-
   renderChatItem = ( chatMsg: IChatMsg, index: number ) => {
     var clsName: string;
 
@@ -146,6 +142,10 @@ class Room extends Component<IProps, IState> {
     );
   }
 
+  onClickSend = () => {
+    this.sendMsg();
+  }
+
   onKeyUp = ( e: React.KeyboardEvent ) => {
     const ENTER_KEY_CODE: number = 13;
 
@@ -160,7 +160,7 @@ class Room extends Component<IProps, IState> {
 
     if( currentTextTrim === '' ) return;
 
-    this.socket.emit( ChatEvent.MESSAGE_FROM_CLIENT, this.roomId, currentTextTrim );
+    this.socket.emit( ChatEvent.MESSAGE_FROM_CLIENT, currentTextTrim );
 
     this.refForm.current.value = '';
   }
