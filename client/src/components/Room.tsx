@@ -127,11 +127,7 @@ class Room extends Component<IProps, IState> {
   }
 
   onClickSend = () => {
-    const currentText: string = this.refForm.current.value;
-
-    this.socket.emit( ChatEvent.MESSAGE_FROM_CLIENT, this.roomId, currentText );
-
-    this.refForm.current.value = '';
+    this.sendMsg();
   }
 
   renderChatItem = ( chatMsg: IChatMsg, index: number ) => {
@@ -150,6 +146,25 @@ class Room extends Component<IProps, IState> {
     );
   }
 
+  onKeyUp = ( e: React.KeyboardEvent ) => {
+    const ENTER_KEY_CODE: number = 13;
+
+    if( e.keyCode !== ENTER_KEY_CODE )  return;
+
+    this.sendMsg();
+  }
+
+  sendMsg = () => {
+    const currentText: string = this.refForm.current.value;
+    const currentTextTrim: string = currentText.trim();
+
+    if( currentTextTrim === '' ) return;
+
+    this.socket.emit( ChatEvent.MESSAGE_FROM_CLIENT, this.roomId, currentTextTrim );
+
+    this.refForm.current.value = '';
+  }
+
   render() {
     const { chatList, roomData } = this.state;
     const { userName } = this.props; 
@@ -162,7 +177,7 @@ class Room extends Component<IProps, IState> {
         <h5>my name: { userName }</h5>
         <InputGroup className="mb-3" id='igChat'>
           <FormControl
-            placeholder="Chat" ref={ this.refForm }
+            placeholder="Chat" ref={ this.refForm } onKeyUp={ this.onKeyUp }
           />
           <InputGroup.Append>
             <Button variant="outline-secondary" onClick={ this.onClickSend }>Send</Button>
