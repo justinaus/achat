@@ -42,13 +42,13 @@ function connectSocket( nsp ) {
     let currentRoomId = null;
     let currentUserName = null; // ex) 39.118.152.x
 
-    socket.on('JOIN_ROOM', ( roomId ) => {
+    socket.on('JOIN_ROOM_FROM_CLIENT', ( roomId ) => {
       const roomData = rooms.find( ( item ) => {
         return String( item.id ) === String( roomId );
       } );
 
       if( !roomData ) {
-        socket.emit('ERROR', 'wrong room');
+        socket.emit('ERROR_FROM_SERVER', 'wrong room');
         return;
       }
 
@@ -59,7 +59,9 @@ function connectSocket( nsp ) {
         currentRoomId = roomId;
         currentUserName = parseIpWithX( clientIp );
 
-        io.to( currentRoomId ).emit('GUEST_CONNECTED', currentUserName);
+        // io.to( currentRoomId ).emit('GUEST_CONNECTED', currentUserName);
+        socket.emit('CONNECTED_SUCCESS', currentUserName);
+        socket.broadcast.to(currentRoomId).emit('GUEST_CONNECTED', currentUserName);
       });
     });
 

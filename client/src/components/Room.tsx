@@ -15,7 +15,7 @@ interface IChatMsg {
 interface IState {
   roomData: IRoom,
   chatList: Array<IChatMsg>,
-  myName: string
+  myName: string | null
 }
 
 class Room extends Component<RouteComponentProps, IState> {
@@ -33,7 +33,7 @@ class Room extends Component<RouteComponentProps, IState> {
     this.state = {
       roomData: locationState,
       chatList: [],
-      myName: ''
+      myName: null
     }
 
     const params: any = this.props.match.params;
@@ -44,7 +44,7 @@ class Room extends Component<RouteComponentProps, IState> {
     
     this.socket = io.connect( HOST );
 
-    this.socket.emit( ChatEvent.JOIN_ROOM, this.roomId);
+    this.socket.emit( ChatEvent.JOIN_ROOM_FROM_CLIENT, this.roomId);
 
     if( !locationState ) {
       this.getData( this.roomId );
@@ -71,6 +71,20 @@ class Room extends Component<RouteComponentProps, IState> {
   }
 
   addSocketEvent = () => {
+    this.socket.on( ChatEvent.CONNECTED_SUCCESS, ( userName: string ) => {
+      this.setState( {
+        myName: userName
+      } );
+
+      const chat: IChatMsg = {
+        text: userName + ' connected',
+        isMyChat: false,
+        isNotice: true
+      }
+
+      this.addChat( chat );
+    } );
+
     this.socket.on( ChatEvent.GUEST_CONNECTED, ( userName: string ) => {
       const chat: IChatMsg = {
         text: userName + ' connected',
@@ -111,7 +125,7 @@ class Room extends Component<RouteComponentProps, IState> {
       this.addChat( chat );
     } );
 
-    this.socket.on( ChatEvent.ERROR, ( msg: string ) => {
+    this.socket.on( ChatEvent.ERROR_FROM_SERVER, ( msg: string ) => {
       alert( msg );
     } );
   }
@@ -171,7 +185,7 @@ class Room extends Component<RouteComponentProps, IState> {
     return (
       <div>
         <h3>{ title }</h3>
-        <h5>my name: { myName }</h5>
+        <h5>my name: { myName || '' }</h5>
         <InputGroup className="mb-3" id='igChat'>
           <FormControl
             placeholder="Chat" ref={ this.refForm } onKeyUp={ this.onKeyUp }
