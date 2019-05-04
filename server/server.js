@@ -54,10 +54,11 @@ function connectSocket( nsp ) {
 
       socket.join( roomId, () => {
         // var socketId = socket.id;
-        var clientIp = socket.request.connection.remoteAddress;
+        const clientIp = socket.request.connection.remoteAddress;
+        const random = Math.round( Math.random() * 10000 );
 
         currentRoomId = roomId;
-        currentUserName = parseIpWithX( clientIp );
+        currentUserName = parseIpWithX( clientIp ) + ' (test' + random + ')';
 
         // io.to( currentRoomId ).emit('GUEST_CONNECTED', currentUserName);
         socket.emit('CONNECTED_SUCCESS', currentUserName);
