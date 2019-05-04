@@ -21,7 +21,7 @@ class RoomList extends Component<RouteComponentProps, IState> {
   getData = () => {
     const ENV_HOST: string | undefined = process.env.REACT_APP_TEMP_HOST;
     const HOST: string = ENV_HOST ? ENV_HOST : 'localhost:4001';
-    const URL: string = `http://${HOST}/rooms`;
+    const URL: string = `http://${HOST}/api/rooms`;
 
     fetch( URL )
     .then( ( response ) => {

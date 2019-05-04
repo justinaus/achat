@@ -54,7 +54,7 @@ class Room extends Component<IProps, IState> {
   }
 
   getData = ( roomId: string ) => {
-    const TEMP_URL: string = 'http://localhost:4001/room/' + roomId;
+    const TEMP_URL: string = 'http://localhost:4001/api/room/' + roomId;
 
     fetch( TEMP_URL )
     .then( ( response ) => {

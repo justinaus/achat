@@ -77,11 +77,11 @@ function connectSocket( nsp ) {
   })
 }
 
-app.get('/rooms', (req, res) => {
+app.get('/api/rooms', (req, res) => {
   return res.json(rooms);
 });
 
-app.get('/room/:id', (req, res) => {
+app.get('/api/room/:id', (req, res) => {
   const room = rooms.find( ( item ) => {
     return String( item.id ) === String( req.params.id )
   } );
