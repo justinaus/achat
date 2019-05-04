@@ -39,12 +39,10 @@ connectSocket( io );
 
 function connectSocket( nsp ) {
   nsp.on('connection', socket => {
-    // socket.broadcast.emit( 'GUEST_CONNECTED', 'a guest connected' );
-
     let currentRoomId = null;
-    let currentUserName = null;
+    let currentUserName = null; // ex) 39.118.152.x
 
-    socket.on('JOIN_ROOM', ( roomId, userName) => {
+    socket.on('JOIN_ROOM', ( roomId ) => {
       const roomData = rooms.find( ( item ) => {
         return String( item.id ) === String( roomId );
       } );
@@ -55,8 +53,11 @@ function connectSocket( nsp ) {
       }
 
       socket.join( roomId, () => {
+        // var socketId = socket.id;
+        var clientIp = socket.request.connection.remoteAddress;
+
         currentRoomId = roomId;
-        currentUserName = userName;
+        currentUserName = parseIpWithX( clientIp );
 
         io.to( currentRoomId ).emit('GUEST_CONNECTED', currentUserName);
       });
@@ -77,6 +78,20 @@ function connectSocket( nsp ) {
   })
 }
 
+function parseIpWithX( strOrigin ) {
+  var arrSplit = strOrigin.split( '.' );
+
+  if( arrSplit.length < 1 ) {
+    return 'invalid ip'
+  }
+
+  arrSplit[ arrSplit.length - 1 ] = 'x';
+
+  const result = arrSplit.join( '.' );
+
+  return result;
+}
+
 app.get('/api/rooms', (req, res) => {
   return res.json(rooms);
 });
@@ -89,4 +104,4 @@ app.get('/api/room/:id', (req, res) => {
   return res.json(room);
 });
 
-server.listen(port, () => console.log(`Listening on port ${port}`))
+server.listen(port, '0.0.0.0', () => console.log(`Listening on port ${port}`))

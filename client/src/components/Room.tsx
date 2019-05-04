@@ -14,19 +14,16 @@ interface IChatMsg {
 
 interface IState {
   roomData: IRoom,
-  chatList: Array<IChatMsg>
+  chatList: Array<IChatMsg>,
+  myName: string
 }
 
-interface IProps extends RouteComponentProps {
-  userName: string
-}
-
-class Room extends Component<IProps, IState> {
+class Room extends Component<RouteComponentProps, IState> {
   socket: SocketIOClient.Socket;
   refForm: RefObject<any>;
   roomId: string;
   
-  constructor( props: IProps ) {
+  constructor( props: RouteComponentProps ) {
     super( props );
     
     this.refForm = React.createRef();
@@ -35,7 +32,8 @@ class Room extends Component<IProps, IState> {
 
     this.state = {
       roomData: locationState,
-      chatList: []
+      chatList: [],
+      myName: ''
     }
 
     const params: any = this.props.match.params;
@@ -46,7 +44,7 @@ class Room extends Component<IProps, IState> {
     
     this.socket = io.connect( HOST );
 
-    this.socket.emit( ChatEvent.JOIN_ROOM, this.roomId, this.props.userName);
+    this.socket.emit( ChatEvent.JOIN_ROOM, this.roomId);
 
     if( !locationState ) {
       this.getData( this.roomId );
@@ -166,15 +164,14 @@ class Room extends Component<IProps, IState> {
   }
 
   render() {
-    const { chatList, roomData } = this.state;
-    const { userName } = this.props; 
-
+    const { chatList, roomData, myName } = this.state;
+    
     const title: string = roomData ? roomData.title : '';
 
     return (
       <div>
         <h3>{ title }</h3>
-        <h5>my name: { userName }</h5>
+        <h5>my name: { myName }</h5>
         <InputGroup className="mb-3" id='igChat'>
           <FormControl
             placeholder="Chat" ref={ this.refForm } onKeyUp={ this.onKeyUp }
