@@ -1,34 +1,40 @@
-import React, { Component, RefObject } from "react";
+import React, { Component, ReactElement } from "react";
 import * as io from 'socket.io-client';
 import { RouteComponentProps } from "react-router";
-import { InputGroup, FormControl, Button } from 'react-bootstrap';
 import './Room.css'
 import ChatEvent from "../../events/ChatEvent";
 import { IRoom } from "../../interfaces/IRoom";
 import ChatEnum from "../../enums/ChatEnum";
+import ChatNotice from "./chat/ChatNotice";
+import ChatMessage from "./chat/ChatMessage";
+import ChatInput from "./ChatInput";
 
-interface IChatMsg {
-  text: string,
+interface IChatBase {
   kind: ChatEnum
+}
+interface IChatNotice extends IChatBase {
+  noticeMsg: string
+}
+interface IChatMsg extends IChatBase {
+  userName: string,
+  msg: string,
+  strTime: string,
+  isMyChat: boolean
 }
 
 interface IState {
   roomData: IRoom,
-  chatList: Array<IChatMsg>,
+  chatList: Array<IChatBase>,
   myName: string | null,
   connectedCount: number
 }
 
 class Room extends Component<RouteComponentProps, IState> {
   socket: SocketIOClient.Socket;
-  refForm: RefObject<any>;
-  roomId: string;
   
   constructor( props: RouteComponentProps ) {
     super( props );
     
-    this.refForm = React.createRef();
-
     const locationState: IRoom = this.props.location.state;
 
     this.state = {
@@ -38,18 +44,18 @@ class Room extends Component<RouteComponentProps, IState> {
       connectedCount: 0
     }
 
-    const params: any = this.props.match.params;
-    this.roomId = params.id;
-    
     const ENV_HOST: string | undefined = process.env.REACT_APP_TEMP_HOST;
     const HOST: string = ENV_HOST ? ENV_HOST : 'localhost:4001';
     
     this.socket = io.connect( HOST );
 
-    this.socket.emit( ChatEvent.JOIN_ROOM_FROM_CLIENT, this.roomId);
+    const params: any = this.props.match.params;
+    const roomId: string = params.id;
+        
+    this.socket.emit( ChatEvent.JOIN_ROOM_FROM_CLIENT, roomId);
 
     if( !locationState ) {
-      this.getData( this.roomId );
+      this.getData( roomId );
     }
   }
 
@@ -79,8 +85,8 @@ class Room extends Component<RouteComponentProps, IState> {
         connectedCount: connectedCount
       } );
 
-      const chat: IChatMsg = {
-        text: userName + ' connected',
+      const chat: IChatNotice = {
+        noticeMsg: userName + ' connected',
         kind: ChatEnum.Notice
       }
 
@@ -92,8 +98,8 @@ class Room extends Component<RouteComponentProps, IState> {
         connectedCount: connectedCount
       } );
 
-      const chat: IChatMsg = {
-        text: userName + ' connected',
+      const chat: IChatNotice = {
+        noticeMsg: userName + ' connected',
         kind: ChatEnum.Notice
       }
 
@@ -105,8 +111,8 @@ class Room extends Component<RouteComponentProps, IState> {
         connectedCount: connectedCount
       } );
 
-      const chat: IChatMsg = {
-        text: userName + ' disconnected',
+      const chat: IChatNotice = {
+        noticeMsg: userName + ' disconnected',
         kind: ChatEnum.Notice
       }
 
@@ -115,7 +121,10 @@ class Room extends Component<RouteComponentProps, IState> {
 
     this.socket.on( ChatEvent.MY_MESSAGE_FROM_SERVER, ( userName:string, msg: string, nowUtc: number ) => {
       const chat: IChatMsg = {
-        text: userName + ': ' + msg,
+        userName: userName,
+        msg: msg,
+        strTime: this.makeTimeStringByUtc( nowUtc ),
+        isMyChat: true,
         kind: ChatEnum.MyChat
       }
 
@@ -124,7 +133,10 @@ class Room extends Component<RouteComponentProps, IState> {
 
     this.socket.on( ChatEvent.OTHERS_MESSAGE_FROM_SERVER, ( userName:string, msg: string, nowUtc: number ) => {
       const chat: IChatMsg = {
-        text: userName + ': ' + msg,
+        userName: userName,
+        msg: msg,
+        strTime: this.makeTimeStringByUtc( nowUtc ),
+        isMyChat: false,
         kind: ChatEnum.OthersChat
       }
 
@@ -136,59 +148,68 @@ class Room extends Component<RouteComponentProps, IState> {
     } );
   }
 
-  addChat = ( chat: IChatMsg ) => {
-    const arrOld: Array<IChatMsg> = this.state.chatList;
+  addChat = ( chat: IChatBase ) => {
+    const arrOld: Array<IChatBase> = this.state.chatList;
 
     this.setState( {
       chatList: arrOld.concat( chat )
     } );
   }
 
-  renderChatItem = ( chatMsg: IChatMsg, index: number ) => {
-    var clsName: string;
+  makeTimeStringByUtc = ( milSec: number ) => {
+    const date: Date = new Date( milSec );
+    let hours: string = String( date.getHours() );
+    let minutes: string = String( date.getMinutes() );
 
-    switch( chatMsg.kind ) {
-      case ChatEnum.Notice :
-        clsName = 'liConnected';
-        break;
-      case ChatEnum.MyChat :
-        clsName = 'liMe';
-        break;
-      case ChatEnum.OthersChat :
-        clsName = 'liOthers';
-        break;
-      default :
-        clsName = '';
+    if( hours.length < 2 ) {
+      hours = '0' + hours;
+    }
+    if( minutes.length < 2 ) {
+      minutes = '0' + minutes;
     }
 
-    return (
-      <li key={ index } className={ clsName }>
-        { chatMsg.text }
-      </li>
-    );
+    return `${ hours }:${ minutes }`;
   }
 
-  onClickSend = () => {
-    this.sendMsg();
+  onSendChat = ( msg: string ) => {
+    this.socket.emit( ChatEvent.MESSAGE_FROM_CLIENT, msg );
   }
 
-  onKeyUp = ( e: React.KeyboardEvent ) => {
-    const ENTER_KEY_CODE: number = 13;
-
-    if( e.keyCode !== ENTER_KEY_CODE )  return;
-
-    this.sendMsg();
-  }
-
-  sendMsg = () => {
-    const currentText: string = this.refForm.current.value;
-    const currentTextTrim: string = currentText.trim();
-
-    if( currentTextTrim === '' ) return;
-
-    this.socket.emit( ChatEvent.MESSAGE_FROM_CLIENT, currentTextTrim );
-
-    this.refForm.current.value = '';
+  renderChatItem = ( chat: IChatBase, index: number ) => {
+    var retComponent: ReactElement | null;
+    
+    switch( chat.kind ) {
+      case ChatEnum.Notice : {
+        const dataNotice: IChatNotice = chat as IChatNotice;
+        retComponent = <ChatNotice key={ index } noticeMsg={ dataNotice.noticeMsg } />
+        break;
+      }
+        
+      case ChatEnum.MyChat :
+        const dataMyChat: IChatMsg = chat as IChatMsg;
+        retComponent = 
+          <ChatMessage 
+            key={ index }
+            userName={ dataMyChat.userName } 
+            msg={ dataMyChat.msg }
+            strTime={ dataMyChat.strTime }
+            isMyChat={ true } />
+        break;
+      case ChatEnum.OthersChat :
+        const dataOthersChat: IChatMsg = chat as IChatMsg;
+        retComponent = 
+          <ChatMessage 
+            key={ index }
+            userName={ dataOthersChat.userName } 
+            msg={ dataOthersChat.msg }
+            strTime={ dataOthersChat.strTime }
+            isMyChat={ false } />
+        break;
+      default:
+        retComponent = null
+    }
+    
+    return retComponent;
   }
 
   render() {
@@ -201,14 +222,7 @@ class Room extends Component<RouteComponentProps, IState> {
         <h3>{ title }</h3>
         <h5>my name: { myName || '' }</h5>
         <h5>users: { connectedCount }</h5>
-        <InputGroup className="mb-3" id='igChat'>
-          <FormControl
-            placeholder="Chat" ref={ this.refForm } onKeyUp={ this.onKeyUp }
-          />
-          <InputGroup.Append>
-            <Button variant="outline-secondary" onClick={ this.onClickSend }>Send</Button>
-          </InputGroup.Append>
-        </InputGroup>
+        <ChatInput onSendChat={ this.onSendChat } />
         <ul>
           { chatList.map( this.renderChatItem ) }
         </ul>

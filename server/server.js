@@ -82,9 +82,11 @@ function connectSocket( nsp ) {
 
     socket.on( 'MESSAGE_FROM_CLIENT', ( msg ) => {
       if( !currentRoomId || !currentUserName )  return;
+      
+      const now = Date.now();
 
-      socket.emit('MY_MESSAGE_FROM_SERVER', currentUserName, msg);
-      socket.broadcast.to(currentRoomId).emit('OTHERS_MESSAGE_FROM_SERVER', currentUserName, msg);
+      socket.emit('MY_MESSAGE_FROM_SERVER', currentUserName, msg, now);
+      socket.broadcast.to(currentRoomId).emit('OTHERS_MESSAGE_FROM_SERVER', currentUserName, msg, now);
     } );
   })
 }
