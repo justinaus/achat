@@ -60,16 +60,24 @@ function connectSocket( nsp ) {
         currentRoomId = roomId;
         currentUserName = parseIpWithX( clientIp ) + ' (test' + random + ')';
 
+        const connectedCount = io.sockets.adapter.rooms[ currentRoomId ].length;
+
         // io.to( currentRoomId ).emit('GUEST_CONNECTED', currentUserName);
-        socket.emit('CONNECTED_SUCCESS', currentUserName);
-        socket.broadcast.to(currentRoomId).emit('GUEST_CONNECTED', currentUserName);
+        socket.emit('CONNECTED_SUCCESS', currentUserName, connectedCount);
+        socket.broadcast.to(currentRoomId).emit('GUEST_CONNECTED', currentUserName, connectedCount);
       });
     });
 
     socket.on( 'disconnect', () => {
       if( !currentRoomId || !currentUserName )  return;
+
+      const currentRoom = io.sockets.adapter.rooms[ currentRoomId ];
+
+      if( !currentRoom )  return;
+
+      const connectedCount = currentRoom.length;
       
-      io.to( currentRoomId ).emit('GUEST_DISCONNECTED', currentUserName);
+      io.to( currentRoomId ).emit('GUEST_DISCONNECTED', currentUserName, connectedCount);
     } );
 
     socket.on( 'MESSAGE_FROM_CLIENT', ( msg ) => {

@@ -15,7 +15,8 @@ interface IChatMsg {
 interface IState {
   roomData: IRoom,
   chatList: Array<IChatMsg>,
-  myName: string | null
+  myName: string | null,
+  connectedCount: number
 }
 
 class Room extends Component<RouteComponentProps, IState> {
@@ -33,7 +34,8 @@ class Room extends Component<RouteComponentProps, IState> {
     this.state = {
       roomData: locationState,
       chatList: [],
-      myName: null
+      myName: null,
+      connectedCount: 0
     }
 
     const params: any = this.props.match.params;
@@ -71,9 +73,10 @@ class Room extends Component<RouteComponentProps, IState> {
   }
 
   addSocketEvent = () => {
-    this.socket.on( ChatEvent.CONNECTED_SUCCESS, ( userName: string ) => {
+    this.socket.on( ChatEvent.CONNECTED_SUCCESS, ( userName: string, connectedCount: number ) => {
       this.setState( {
-        myName: userName
+        myName: userName,
+        connectedCount: connectedCount
       } );
 
       const chat: IChatMsg = {
@@ -85,7 +88,11 @@ class Room extends Component<RouteComponentProps, IState> {
       this.addChat( chat );
     } );
 
-    this.socket.on( ChatEvent.GUEST_CONNECTED, ( userName: string ) => {
+    this.socket.on( ChatEvent.GUEST_CONNECTED, ( userName: string, connectedCount: number ) => {
+      this.setState( {
+        connectedCount: connectedCount
+      } );
+
       const chat: IChatMsg = {
         text: userName + ' connected',
         isMyChat: false,
@@ -95,7 +102,11 @@ class Room extends Component<RouteComponentProps, IState> {
       this.addChat( chat );
     } );
 
-    this.socket.on( ChatEvent.GUEST_DISCONNECTED, ( userName: string ) => {
+    this.socket.on( ChatEvent.GUEST_DISCONNECTED, ( userName: string, connectedCount: number ) => {
+      this.setState( {
+        connectedCount: connectedCount
+      } );
+
       const chat: IChatMsg = {
         text: userName + ' disconnected',
         isMyChat: false,
@@ -178,7 +189,7 @@ class Room extends Component<RouteComponentProps, IState> {
   }
 
   render() {
-    const { chatList, roomData, myName } = this.state;
+    const { chatList, roomData, myName, connectedCount } = this.state;
     
     const title: string = roomData ? roomData.title : '';
 
@@ -186,6 +197,7 @@ class Room extends Component<RouteComponentProps, IState> {
       <div>
         <h3>{ title }</h3>
         <h5>my name: { myName || '' }</h5>
+        <h5>users: { connectedCount }</h5>
         <InputGroup className="mb-3" id='igChat'>
           <FormControl
             placeholder="Chat" ref={ this.refForm } onKeyUp={ this.onKeyUp }
