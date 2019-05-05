@@ -5,11 +5,11 @@ import { InputGroup, FormControl, Button } from 'react-bootstrap';
 import './Room.css'
 import ChatEvent from "../events/ChatEvent";
 import { IRoom } from "../interfaces/IRoom";
+import ChatEnum from "../enums/ChatEnum";
 
 interface IChatMsg {
   text: string,
-  isMyChat: boolean,
-  isNotice: boolean
+  kind: ChatEnum
 }
 
 interface IState {
@@ -81,8 +81,7 @@ class Room extends Component<RouteComponentProps, IState> {
 
       const chat: IChatMsg = {
         text: userName + ' connected',
-        isMyChat: false,
-        isNotice: true
+        kind: ChatEnum.Notice
       }
 
       this.addChat( chat );
@@ -95,8 +94,7 @@ class Room extends Component<RouteComponentProps, IState> {
 
       const chat: IChatMsg = {
         text: userName + ' connected',
-        isMyChat: false,
-        isNotice: true
+        kind: ChatEnum.Notice
       }
 
       this.addChat( chat );
@@ -109,28 +107,25 @@ class Room extends Component<RouteComponentProps, IState> {
 
       const chat: IChatMsg = {
         text: userName + ' disconnected',
-        isMyChat: false,
-        isNotice: true
+        kind: ChatEnum.Notice
       }
 
       this.addChat( chat );
     } );
 
-    this.socket.on( ChatEvent.MY_MESSAGE_FROM_SERVER, ( userName:string, msg: string ) => {
+    this.socket.on( ChatEvent.MY_MESSAGE_FROM_SERVER, ( userName:string, msg: string, nowUtc: number ) => {
       const chat: IChatMsg = {
         text: userName + ': ' + msg,
-        isMyChat: true,
-        isNotice: false
+        kind: ChatEnum.MyChat
       }
 
       this.addChat( chat );
     } );
 
-    this.socket.on( ChatEvent.OTHERS_MESSAGE_FROM_SERVER, ( userName:string, msg: string ) => {
+    this.socket.on( ChatEvent.OTHERS_MESSAGE_FROM_SERVER, ( userName:string, msg: string, nowUtc: number ) => {
       const chat: IChatMsg = {
         text: userName + ': ' + msg,
-        isMyChat: false,
-        isNotice: false
+        kind: ChatEnum.OthersChat
       }
 
       this.addChat( chat );
@@ -152,10 +147,18 @@ class Room extends Component<RouteComponentProps, IState> {
   renderChatItem = ( chatMsg: IChatMsg, index: number ) => {
     var clsName: string;
 
-    if( chatMsg.isNotice ) {
-      clsName = 'liConnected';
-    } else {
-      clsName = chatMsg.isMyChat ? 'liMe' : 'liOthers';
+    switch( chatMsg.kind ) {
+      case ChatEnum.Notice :
+        clsName = 'liConnected';
+        break;
+      case ChatEnum.MyChat :
+        clsName = 'liMe';
+        break;
+      case ChatEnum.OthersChat :
+        clsName = 'liOthers';
+        break;
+      default :
+        clsName = '';
     }
 
     return (
