@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { RouteComponentProps } from "react-router";
-import { IRoom } from "../interfaces/IRoom";
+import { IRoom } from "../../interfaces/IRoom";
 import { Table } from "react-bootstrap";
 
 interface IState {

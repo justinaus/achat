@@ -3,9 +3,9 @@ import * as io from 'socket.io-client';
 import { RouteComponentProps } from "react-router";
 import { InputGroup, FormControl, Button } from 'react-bootstrap';
 import './Room.css'
-import ChatEvent from "../events/ChatEvent";
-import { IRoom } from "../interfaces/IRoom";
-import ChatEnum from "../enums/ChatEnum";
+import ChatEvent from "../../events/ChatEvent";
+import { IRoom } from "../../interfaces/IRoom";
+import ChatEnum from "../../enums/ChatEnum";
 
 interface IChatMsg {
   text: string,
