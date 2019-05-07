@@ -13,25 +13,6 @@ app.use(cors());
 // our server instance
 const server = http.createServer(app)
 
-const rooms = [
-  {
-    "id": 1,
-    "title": "Anim occaecat"
-  },
-  {
-    "id": 2,
-    "title": "Bulla et est sint"
-  },
-  {
-    "id": 3,
-    "title": "Colore"
-  },
-  {
-    "id": 4,
-    "title": "Exercitation ea"
-  }
-];
-
 // This creates our socket using the instance of the server
 const io = socketIO(server);
 
@@ -43,6 +24,8 @@ function connectSocket( nsp ) {
     let currentUserName = null; // ex) 39.118.152.x
 
     socket.on('JOIN_ROOM_FROM_CLIENT', ( roomId ) => {
+      const rooms = getJsonRooms();
+
       const roomData = rooms.find( ( item ) => {
         return String( item.id ) === String( roomId );
       } );
@@ -105,11 +88,21 @@ function parseIpWithX( strOrigin ) {
   return result;
 }
 
+function getJsonRooms() {
+  const json = require('./data.json');
+  
+  return json.rooms;
+}
+
 app.get('/api/rooms', (req, res) => {
-  return res.json(rooms);
+  const rooms = getJsonRooms();
+
+  return res.json( rooms );
 });
 
 app.get('/api/room/:id', (req, res) => {
+  const rooms = getJsonRooms();
+
   const room = rooms.find( ( item ) => {
     return String( item.id ) === String( req.params.id )
   } );
