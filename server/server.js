@@ -2,6 +2,7 @@ const express = require('express')
 const http = require('http')
 const socketIO = require('socket.io')
 const cors = require('cors');
+const moment = require('moment-timezone');
 
 // our localhost port
 const port = 4001
@@ -89,9 +90,72 @@ function parseIpWithX( strOrigin ) {
 }
 
 function getJsonRooms() {
-  const json = require('./data.json');
+  const strNow = moment().tz( 'Asia/Seoul' ).format( 'YYYYMMDDHHmm' );
   
-  return json.rooms;
+  const arrMonthRoomDataList = getMonthListByNow( strNow );
+
+  const arrRoomList = getListForRoom( strNow, arrMonthRoomDataList );
+  
+  return arrRoomList;
+}
+
+function getListForRoom( strNow, arrItemList ) {
+  var arrRet = [];
+
+  var item;
+  var startTime;
+  var endTime;
+
+  for(var i=0; i<arrItemList.length; ++i) {
+    item = arrItemList[ i ];
+    startTime = item.start_time;
+    endTime = item.end_time;
+
+    if( Number( startTime ) > Number( strNow ) ) {
+      continue;
+    }
+    if( Number( endTime ) < Number( strNow ) ) {
+      continue;
+    }
+
+    arrRet.push( item );
+  }
+
+  return arrRet;
+}
+
+function getMonthListByNow( strNow ) {
+  const json = require('./room.json');
+
+  var arrList = json[ strNow.slice( 0,6 ) ];
+  
+  const strYear = strNow.slice( 0,4 );
+  const strMonth = strNow.slice( 4,6 );
+  const strDay = strNow.slice( 6,8 );
+
+  if( getIsLastDay( Number( strYear ), Number( strMonth ) - 1, Number( strDay ) ) ) {
+    const nNextMonth = Number( strMonth ) + 1;
+    const next = json[ strYear + make00String( nNextMonth ) ];
+    arrList.push( next );
+  } else if( Number( strDay ) === 1 ) {
+    const nPrevMonth = Number( strMonth ) - 1;
+    const prev = json[ strYear + make00String( nPrevMonth ) ];
+    arrList.push( prev );
+  }
+
+  return arrList;
+}
+
+function getIsLastDay( y, m, nDay){
+  return  new Date(y, m +1, 0).getDate() === nDay;
+}
+
+function make00String( nOrigin ) {
+  if( nOrigin < 10 ) {
+    nOrigin = '0' + nOrigin;
+  }
+
+  return '' + nOrigin;
 }
 
 app.get('/api/rooms', (req, res) => {
