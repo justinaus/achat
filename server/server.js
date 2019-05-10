@@ -3,6 +3,7 @@ const http = require('http')
 const socketIO = require('socket.io')
 const cors = require('cors');
 const moment = require('moment-timezone');
+const { make00String, getIsLastDay, parseIpLastX } = require('./utils.js');
 
 // our localhost port
 const port = 4001
@@ -42,7 +43,7 @@ function connectSocket( nsp ) {
         const random = Math.round( Math.random() * 10000 );
 
         currentRoomId = roomId;
-        currentUserName = parseIpWithX( clientIp ) + ' (test' + random + ')';
+        currentUserName = parseIpLastX( clientIp ) + ' (test' + random + ')';
 
         const connectedCount = io.sockets.adapter.rooms[ currentRoomId ].length;
 
@@ -73,20 +74,6 @@ function connectSocket( nsp ) {
       socket.broadcast.to(currentRoomId).emit('OTHERS_MESSAGE_FROM_SERVER', currentUserName, msg, now);
     } );
   })
-}
-
-function parseIpWithX( strOrigin ) {
-  var arrSplit = strOrigin.split( '.' );
-
-  if( arrSplit.length < 1 ) {
-    return 'invalid ip'
-  }
-
-  arrSplit[ arrSplit.length - 1 ] = 'x';
-
-  const result = arrSplit.join( '.' );
-
-  return result;
 }
 
 function getJsonRooms() {
@@ -144,18 +131,6 @@ function getMonthListByNow( strNow ) {
   }
 
   return arrList;
-}
-
-function getIsLastDay( y, m, nDay){
-  return  new Date(y, m +1, 0).getDate() === nDay;
-}
-
-function make00String( nOrigin ) {
-  if( nOrigin < 10 ) {
-    nOrigin = '0' + nOrigin;
-  }
-
-  return '' + nOrigin;
 }
 
 app.get('/api/rooms', (req, res) => {
