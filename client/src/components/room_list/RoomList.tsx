@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { RouteComponentProps } from "react-router";
 import { IRoom } from "../../interfaces/IRoom";
-import { Table } from "react-bootstrap";
 
 interface IState {
   roomList: Array<IRoom>
@@ -51,11 +50,11 @@ class RoomList extends Component<RouteComponentProps, IState> {
     const roomList = this.state.roomList;
 
     return (
-      <Table hover size="sm">
+      <table>
         <tbody>
           { roomList.map( this.renderRoomItem ) }
         </tbody>
-      </Table>
+      </table>
     );
   }
 }

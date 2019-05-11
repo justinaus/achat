@@ -1,6 +1,4 @@
-import React, { Component, RefObject } from "react";
-import { InputGroup, FormControl } from "react-bootstrap";
-import { Button } from "react-bootstrap";
+import React, { Component, RefObject, SyntheticEvent } from "react";
 
 interface IProps {
   onSendChat: ( msg: string ) => void
@@ -26,28 +24,18 @@ class ChatInput extends Component<IProps, any> {
     this.refForm.current.value = '';
   }
   
-  onClickSend = () => {
-    this.sendMsg();
-  }
-
-  onKeyUp = ( e: React.KeyboardEvent ) => {
-    const ENTER_KEY_CODE: number = 13;
-
-    if( e.keyCode !== ENTER_KEY_CODE )  return;
+  onSubmit = ( e: SyntheticEvent ) => {
+    e.preventDefault();
 
     this.sendMsg();
   }
 
   render() {
     return (
-      <InputGroup className="mb-3" id='igChat'>
-        <FormControl
-          placeholder="Chat" ref={ this.refForm } onKeyUp={ this.onKeyUp }
-        />
-        <InputGroup.Append>
-          <Button variant="outline-secondary" onClick={ this.onClickSend }>Send</Button>
-        </InputGroup.Append>
-      </InputGroup>
+      <form onSubmit={ this.onSubmit }>
+        <input placeholder='Chat' ref={ this.refForm } />
+        <button>Send</button>
+      </form>
     );
   }
 }
