@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import classNames from 'classnames';
+import styles from './ChatNotice.module.css'
 
 interface IProps {
   noticeMsg: string
@@ -9,7 +11,7 @@ class ChatNotice extends Component<IProps, any> {
     const { noticeMsg } = this.props;
 
     return (
-      <li className={ 'liConnected' }>
+      <li className={classNames(styles.wrapper)}>
         <span>{ noticeMsg }</span>
       </li>
     );

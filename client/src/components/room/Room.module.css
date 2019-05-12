@@ -1,0 +1,29 @@
+.wrapper {
+  height: -webkit-fill-available;
+}
+
+.list {
+  padding: 16px;
+  padding-bottom: calc(56px + 16px);
+  list-style: none;
+  font-size: 14px;
+  color: #707070;
+}
+
+.list > li + li {
+  margin-top: 15px;
+}
+
+.form {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 56px;
+  padding-right: 16px;
+  padding-left: 16px;
+  border-top: 1px solid #cecece;
+  margin-top: auto;
+  background-color: #fff;
+}

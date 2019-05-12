@@ -1,4 +1,5 @@
 import React, { Component, RefObject, SyntheticEvent } from "react";
+import styles from './ChatInput.module.css'
 
 interface IProps {
   onSendChat: ( msg: string ) => void
@@ -32,9 +33,13 @@ class ChatInput extends Component<IProps, any> {
 
   render() {
     return (
-      <form onSubmit={ this.onSubmit }>
-        <input placeholder='Chat' ref={ this.refForm } />
-        <button>Send</button>
+      <form onSubmit={ this.onSubmit } className={styles.wrapper}>
+        <input placeholder="Type a Message..." ref={ this.refForm } className={styles.input} />
+        <button type="submit" className={styles.button}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="21" height="18" viewBox="0 0 21 18">
+            <path d="M2.01,21,23,12,2.01,3,2,10l15,2L2,14Z" transform="translate(-2 -3)" fill="#ff922b"/>
+          </svg>
+        </button>
       </form>
     );
   }

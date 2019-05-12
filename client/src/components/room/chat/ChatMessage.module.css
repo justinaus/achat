@@ -1,0 +1,17 @@
+.wrapper {
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.name {
+  font-weight: bold;
+}
+
+:global(.is-me) .name {
+  color: #ff922b;
+}
+
+.time {
+  font-size: 11px;
+  color: #ced4da;
+}
