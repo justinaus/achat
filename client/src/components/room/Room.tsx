@@ -1,13 +1,14 @@
 import React, { Component, ReactElement } from "react";
 import * as io from 'socket.io-client';
 import { RouteComponentProps } from "react-router";
-import './Room.css'
+import styles from './Room.module.css'
 import ChatEvent from "../../events/ChatEvent";
 import { IRoom } from "../../interfaces/IRoom";
 import ChatEnum from "../../enums/ChatEnum";
 import ChatNotice from "./chat/ChatNotice";
 import ChatMessage from "./chat/ChatMessage";
 import ChatInput from "./ChatInput";
+import RoomHeader from './RoomHeader'
 
 interface IChatBase {
   kind: ChatEnum
@@ -213,19 +214,24 @@ class Room extends Component<RouteComponentProps, IState> {
   }
 
   render() {
-    const { chatList, roomData, myName, connectedCount } = this.state;
+    const { chatList, roomData, connectedCount } = this.state;
     
     const title: string = roomData ? roomData.title : '';
 
     return (
-      <div>
-        <h3>{ title }</h3>
-        <h5>my name: { myName || '' }</h5>
-        <h5>users: { connectedCount }</h5>
-        <ChatInput onSendChat={ this.onSendChat } />
-        <ul>
+      <div className={styles.wrapper}>
+        <RoomHeader 
+          title={title}
+          connectedCount={connectedCount} 
+        />
+
+        <ul className={styles.list}>
           { chatList.map( this.renderChatItem ) }
         </ul>
+
+        <div className={styles.form}>
+          <ChatInput onSendChat={ this.onSendChat } />
+        </div>
       </div>
     );
   }

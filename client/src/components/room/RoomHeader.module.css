@@ -1,0 +1,29 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 60px;
+  padding-right: 16px;
+  padding-left: 16px;
+  background-color: #ff922b;
+}
+
+.prev {
+  position: absolute;
+  left: 16px;
+}
+
+.body {
+  text-align: center;
+  color: #fff;
+}
+
+.title {
+  font-size: 14px;
+}
+
+.users {
+  margin-top: 5px;
+  font-size: 10px;
+}
