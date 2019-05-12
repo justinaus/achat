@@ -4,6 +4,7 @@
 
 .list {
   padding: 16px;
+  padding-bottom: calc(56px + 16px);
   list-style: none;
   font-size: 14px;
   color: #707070;
@@ -24,4 +25,5 @@
   padding-left: 16px;
   border-top: 1px solid #cecece;
   margin-top: auto;
+  background-color: #fff;
 }
