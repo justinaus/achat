@@ -1,0 +1,17 @@
+.header {
+  display: flex;
+  justify-content: center; /* align horizontal */
+  align-items: center; /* align vertical */
+  background-color: #fd7e14;
+  height: 60px
+}
+
+.imgLogo {
+  height: 40px;
+  flex: 0;
+}
+
+.ulRoomList {
+  padding: 10px;
+  margin: 0;
+}

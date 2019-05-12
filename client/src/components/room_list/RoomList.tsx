@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { RouteComponentProps } from "react-router";
 import { IRoom } from "../../interfaces/IRoom";
+import './RoomList.css'
+import RoomListItem from "./RoomListItem";
 
 interface IState {
   roomList: Array<IRoom>
@@ -40,9 +42,10 @@ class RoomList extends Component<RouteComponentProps, IState> {
 
   renderRoomItem = ( roomData: IRoom ) => {
     return (
-      <tr key={ roomData.id } onClick={ () => this.onClickItem( roomData ) }>
-        <td>{ roomData.title }</td>
-      </tr>
+      <RoomListItem 
+        key={ roomData.id } 
+        roomData={ roomData } 
+        onClickItem={ this.onClickItem } />
     );
   }
 
@@ -50,11 +53,14 @@ class RoomList extends Component<RouteComponentProps, IState> {
     const roomList = this.state.roomList;
 
     return (
-      <table>
-        <tbody>
+      <div>
+        <div className='header'>
+          <img src='/assets/images/microsoft_PNG19.png' className='imgLogo' alt='logo' />
+        </div>
+        <ul className="ulRoomList">
           { roomList.map( this.renderRoomItem ) }
-        </tbody>
-      </table>
+        </ul>
+      </div>
     );
   }
 }
