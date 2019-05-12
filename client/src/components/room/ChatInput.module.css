@@ -8,4 +8,11 @@
   flex: 1;
   margin-right: 16px;
   font-size: 14px;
+  font-family: inherit;
+  border: 0;
+}
+
+.button {
+  border: 0;
+  background-color: transparent;
 }
