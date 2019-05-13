@@ -3,6 +3,7 @@ const http = require('http')
 const socketIO = require('socket.io')
 const cors = require('cors');
 const moment = require('moment-timezone');
+const fs = require('fs');
 const { make00String, getIsLastDay, parseIpLastX } = require('./utils.js');
 
 // our localhost port
@@ -116,7 +117,7 @@ function getListForRoom( strNow, arrItemList ) {
 }
 
 function getMonthListByNow( strNow ) {
-  const json = require('./room.json');
+  const json = JSON.parse(fs.readFileSync('./room.json', 'utf8'));
 
   var arrList = json[ strNow.slice( 0,6 ) ];
   
