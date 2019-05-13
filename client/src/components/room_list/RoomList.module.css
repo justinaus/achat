@@ -6,12 +6,12 @@
   height: 60px
 }
 
-.imgLogo {
+.logo {
   height: 40px;
   flex: 0;
 }
 
-.ulRoomList {
-  padding: 10px;
-  margin: 0;
+.list {
+  padding-left: 16px;
+  padding-right: 16px;
 }

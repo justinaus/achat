@@ -1,0 +1,24 @@
+.wrapper {
+  line-height: 1.6;
+  word-break: break-all;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: 6px;
+  padding-right:6px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.title {
+  font-size: 14px;
+  color: #343a40;
+}
+
+.time {
+  font-size: 10px;
+  color: #868e96;
+}
+
+.users {
+  font-size: 12px;
+  color: #868e96;
+}

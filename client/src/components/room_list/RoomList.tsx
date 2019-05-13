@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { RouteComponentProps } from "react-router";
 import { IRoom } from "../../interfaces/IRoom";
-import './RoomList.css'
+import styles from './RoomList.module.css'
 import RoomListItem from "./RoomListItem";
 
 interface IState {
@@ -54,10 +54,10 @@ class RoomList extends Component<RouteComponentProps, IState> {
 
     return (
       <div>
-        <div className='header'>
-          <img src='/assets/images/microsoft_PNG19.png' className='imgLogo' alt='logo' />
+        <div className={ styles.header }>
+          <img src='/assets/images/microsoft_PNG19.png' className={ styles.logo } alt='logo' />
         </div>
-        <ul className="ulRoomList">
+        <ul className={ styles.list }>
           { roomList.map( this.renderRoomItem ) }
         </ul>
       </div>
