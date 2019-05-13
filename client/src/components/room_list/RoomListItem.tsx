@@ -8,13 +8,28 @@ interface IProps {
 }
 
 class RoomListItem extends Component<IProps, any> {
+  getTimeString = ( strYYYYMMDDHHmm: String ) => {
+    const strHHmm = strYYYYMMDDHHmm.slice(-4);
+    const start = strHHmm.slice( 0,2 );
+    const end = strHHmm.slice( 2 );
+
+    return start + ':' + end;
+  }
+
+  getWholeTimeString = ( roomData: IRoom ) => {
+    const start = this.getTimeString( roomData.start_time );
+    const end = this.getTimeString( roomData.end_time );
+    
+    return start + ' ~ ' + end;
+  }
+
   render() {
     const { roomData, onClickItem } = this.props;
     
     return (
       <li className='liRoomListItemContainer' onClick={ () => onClickItem( roomData ) }>
         <div>
-          10:00 ~ 13:00
+          { roomData ? this.getWholeTimeString( roomData ) : null }
         </div>
         <div>
           <span>{ roomData.title }</span>

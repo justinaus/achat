@@ -1,4 +1,6 @@
 export interface IRoom {
   id: number,
-  title: string
+  title: string,
+  start_time: string,  // ex) 201905101440
+  end_time: string
 }
