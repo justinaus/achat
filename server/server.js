@@ -105,6 +105,10 @@ function getListForRoom( strNow, arrItemList ) {
       continue;
     }
 
+    // 룸이 이미 존재 하면 그 숫자, 없으면 널.
+    const roomById = io.sockets.adapter.rooms[ item.id ];
+    item.connected_count = roomById ? roomById.length : null;
+
     arrRet.push( item );
   }
 

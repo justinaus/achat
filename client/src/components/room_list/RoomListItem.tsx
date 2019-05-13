@@ -28,12 +28,12 @@ class RoomListItem extends Component<IProps, any> {
     
     return (
       <li className='liRoomListItemContainer' onClick={ () => onClickItem( roomData ) }>
-        <div>
+        <h4>
           { roomData ? this.getWholeTimeString( roomData ) : null }
-        </div>
+        </h4>
         <div>
-          <span>{ roomData.title }</span>
-          <span>3명</span>
+          <h3>{ roomData ? roomData.title : '' }</h3>
+          <h4>{ roomData && roomData.connected_count ? roomData.connected_count : 0 } 명</h4>
         </div>
       </li>
     );
