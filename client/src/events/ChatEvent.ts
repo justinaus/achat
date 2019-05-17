@@ -9,6 +9,8 @@ class ChatEvent {
 
   public static readonly MESSAGE_FROM_CLIENT = 'MESSAGE_FROM_CLIENT';
   public static readonly JOIN_ROOM_FROM_CLIENT = 'JOIN_ROOM_FROM_CLIENT';
+
+  public static readonly CLOSED_ROOM = 'CLOSED_ROOM';
 }
 
 export default ChatEvent;

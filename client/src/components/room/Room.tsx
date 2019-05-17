@@ -144,8 +144,12 @@ class Room extends Component<RouteComponentProps, IState> {
       this.addChat( chat );
     } );
 
-    this.socket.on( ChatEvent.ERROR_FROM_SERVER, ( msg: string ) => {
-      alert( msg );
+    this.socket.on( ChatEvent.ERROR_FROM_SERVER, () => {
+      alert( '현재 존재하지 않는 방입니다.' );
+    } );
+
+    this.socket.on( ChatEvent.CLOSED_ROOM, () => {
+      alert( '현재 존재하지 않는 방입니다.' );
     } );
   }
 
