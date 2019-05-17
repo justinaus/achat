@@ -24,11 +24,15 @@ function getMonthListByNow( strNow ) {
   if( getIsLastDay( Number( strYear ), Number( strMonth ) - 1, Number( strDay ) ) ) {
     const nNextMonth = Number( strMonth ) + 1;
     const next = json[ strYear + make00String( nNextMonth ) ];
-    arrList.push( next );
+    if( next ) {
+      arrList.push( next );
+    }
   } else if( Number( strDay ) === 1 ) {
     const nPrevMonth = Number( strMonth ) - 1;
     const prev = json[ strYear + make00String( nPrevMonth ) ];
-    arrList.push( prev );
+    if( prev ) {
+      arrList.push( prev );
+    }
   }
 
   return arrList;
