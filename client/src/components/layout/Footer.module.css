@@ -1,4 +1,4 @@
 .container {
-  background-color: #e9ecef;
+  background-color: var(--very-light-gray);
   height: 40px
 }

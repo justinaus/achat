@@ -8,6 +8,14 @@
   box-sizing: border-box;
 }
 
+:root{
+  --main-color: #d4ac4c;
+  --very-light-gray: #f1f3f5;
+  --light-gray: #e9ecef;
+  --gray: #868e96;
+  --very-dark-gray: #343a40;
+}
+
 body {
   margin: 0;
   padding: 0;

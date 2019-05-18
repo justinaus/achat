@@ -4,7 +4,8 @@
   align-items: center; /* align vertical */
   /* background-color: #fd7e14; */
   /* background-color: #e1ad01; */
-  background-color: #d4ac4c;
+  /* background-color: #d4ac4c; */
+  background-color: var(--main-color);
   height: 60px
 }
 
