@@ -5,6 +5,9 @@
   padding-bottom: 20px;
   padding-left: 6px;
   padding-right:6px;
+}
+
+.borderBottom {
   border-bottom: 1px solid #e9ecef;
 }
 

@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import styles from './RoomListItem.module.css'
 import { IRoom } from "../../interfaces/IRoom";
+import classNames from "classnames";
 
 interface IProps {
   roomData: IRoom,
-  onClickItem: ( roomData: IRoom ) => void
+  onClickItem: ( roomData: IRoom ) => void,
+  isLast: boolean
 }
 
 class RoomListItem extends Component<IProps, any> {
@@ -24,10 +26,18 @@ class RoomListItem extends Component<IProps, any> {
   }
 
   render() {
-    const { roomData, onClickItem } = this.props;
+    const { roomData, onClickItem, isLast } = this.props;
+
+    let cn: any;
+
+    if( isLast ) {
+      cn = classNames( styles.wrapper );
+    } else {
+      cn = classNames( styles.wrapper, styles.borderBottom );
+    }
     
     return (
-      <li className={ styles.wrapper } onClick={ () => onClickItem( roomData ) }>
+      <li className={ cn } onClick={ () => onClickItem( roomData ) }>
         <div className={ styles.time }>
           { roomData ? this.getWholeTimeString( roomData ) : null }
         </div>

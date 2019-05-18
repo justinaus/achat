@@ -2,12 +2,14 @@
   display: flex;
   justify-content: center; /* align horizontal */
   align-items: center; /* align vertical */
-  background-color: #fd7e14;
+  /* background-color: #fd7e14; */
+  /* background-color: #e1ad01; */
+  background-color: #d4ac4c;
   height: 60px
 }
 
 .logo {
-  height: 40px;
+  height: 12px;
   flex: 0;
 }
 
