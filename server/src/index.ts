@@ -1,9 +1,6 @@
 import express from 'express'
 import cors from 'cors'
 import http from 'http'
-import { JSDOM } from 'jsdom'
-import fetch from 'node-fetch'
-import moment from 'moment'
 import socketIO from 'socket.io'
 import DataManager from './DataManager';
 import IRoom from './interfaces/IRoom';
@@ -26,7 +23,15 @@ function connectSocket( socketServer: socketIO.Server ) {
     let currentRoomName: string | null = null;
     let currentUserName: string | null = null; // ex) 39.118.152.x
 
-    socket.on('JOIN_ROOM_FROM_CLIENT', ( roomName ) => {
+    socket.on('JOIN_ROOM_FROM_CLIENT', async ( roomName ) => {
+      const isValidRoom = await getIsValidRoomByRoomName( roomName );
+
+      if( !isValidRoom ) {
+        closeRoom( roomName );
+        socket.emit('ERROR_FROM_SERVER');
+        return;
+      }
+
       socket.join( roomName, () => {
         // var socketId = socket.id;
         const clientIp = socket.request.connection.remoteAddress;
@@ -43,10 +48,12 @@ function connectSocket( socketServer: socketIO.Server ) {
       });
     });
 
-    socket.on( 'disconnect', () => {
+    socket.on( 'disconnect', async () => {
       if( !currentRoomName || !currentUserName )  return;
 
-      if( !getIsValidRoomByRoomName( currentRoomName ) ) {
+      const isValidRoom = await getIsValidRoomByRoomName( currentRoomName );
+
+      if( !isValidRoom ) {
         closeRoom( currentRoomName );
         return;
       }
@@ -60,12 +67,13 @@ function connectSocket( socketServer: socketIO.Server ) {
       io.to( currentRoomName ).emit('GUEST_DISCONNECTED', currentUserName, connectedCount);
     } );
 
-    socket.on( 'MESSAGE_FROM_CLIENT', ( msg ) => {
+    socket.on( 'MESSAGE_FROM_CLIENT', async ( msg ) => {
       if( !currentRoomName || !currentUserName )  return;
 
-      if( !getIsValidRoomByRoomName( currentRoomName ) ) {
-        closeRoom( currentRoomName );
+      const isValidRoom = await getIsValidRoomByRoomName( currentRoomName );
 
+      if( !isValidRoom ) {
+        closeRoom( currentRoomName );
         socket.emit('ERROR_FROM_SERVER');
         return;
       }
@@ -78,10 +86,10 @@ function connectSocket( socketServer: socketIO.Server ) {
   })
 }
 
-function getIsValidRoomByRoomName( roomName: String ) {
-  const rooms = dataManager.getJsonRoomsNow();
+async function getIsValidRoomByRoomName( roomName: String ) {
+  const rooms = await dataManager.getJsonRoomsNow();
 
-  const roomData = rooms.find( ( item ) => {
+  const roomData = rooms.find( ( item: IRoom ) => {
     return String( item.id ) === String( roomName );
   } );
 
@@ -127,43 +135,17 @@ function addConnectedCountToItem( arrRooms: Array<IRoom> ) {
 }
 
 app.get('/api/rooms', async (req, res) => {
-  const params = new URLSearchParams({
-    pkid: '66',
-    where: 'nexearch',
-    key: 'MultiChannelWeekSchedule',
-    u1: '999',
-    u5: moment().format('YYYYMMDD0hhmm0'),
-    u2: '814715|815041|815548|814863|814819|814825|815571|815572|815574|815576|2438226|814595|814592|814588|814582|2876055|814574',
-  })
-  const response = await fetch(`https://m.search.naver.com/p/csearch/content/nqapirender.nhn?${params}`)
-  const data = await response.json()
-  const document = new JSDOM(data.dataHtml).window.document
-  
-  const rooms: any = [...document.querySelectorAll('.ind_program.on')].map((item, index) => {
-    const titleEl = <HTMLElement>item.querySelector('.pr_title')
-    const href = titleEl.getAttribute('href') || ''
-    const id = href.slice(1).split('&').find(q => q.startsWith('os'))
-    const timeEl = <HTMLElement>item.querySelector('.time')
-    const nextItem = item.nextElementSibling
-    const endTimeEl = nextItem ? nextItem.querySelector('.time') : null
-
-    return {
-      id: id ? id.replace('os=', '') : index + 1,
-      title: titleEl.innerHTML || '',
-      start_time: timeEl.innerHTML || '',
-      end_time: endTimeEl ? endTimeEl.innerHTML : '--:--'
-    }
-  })
+  const rooms = await dataManager.getJsonRoomsNow();
 
   addConnectedCountToItem( rooms );
 
   return res.json( rooms );
 });
 
-app.get('/api/room/:id', (req, res) => {
-  const rooms = dataManager.getJsonRoomsNow();
+app.get('/api/room/:id', async (req, res) => {
+  const rooms = await dataManager.getJsonRoomsNow();
 
-  const room = rooms.find( ( item ) => {
+  const room = rooms.find( ( item: IRoom ) => {
     return String( item.id ) === String( req.params.id )
   } );
 

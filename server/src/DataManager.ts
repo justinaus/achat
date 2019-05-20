@@ -1,72 +1,38 @@
-import moment from 'moment-timezone'
-import fs from 'fs'
-import IRoom from './interfaces/IRoom';
-import DateUtils from './utils/DateUtils';
-import StringUtils from './utils/StringUtils';
+import moment = require("moment");
+import { JSDOM } from "jsdom";
+import fetch from 'node-fetch'
 
 export default class DataManager {
-  public getJsonRoomsNow() {
-    const strNow = moment().tz( 'Asia/Seoul' ).format( 'YYYYMMDDHHmm' );
-    
-    const arrMonthRoomDataList = this.getMonthListByNow( strNow );
-  
-    const arrRoomList = this.getListForRoom( strNow, arrMonthRoomDataList );
-    
-    return arrRoomList;
-  }
+  public async getJsonRoomsNow() {
+    const params = new URLSearchParams({
+      pkid: '66',
+      where: 'nexearch',
+      key: 'MultiChannelWeekSchedule',
+      u1: '999',
+      u5: moment().format('YYYYMMDD0hhmm0'),
+      u2: '814715|815041|815548|814863|814819|814825|815571|815572|815574|815576|2438226|814595|814592|814588|814582|2876055|814574',
+    })
 
-  private getMonthListByNow( strNow: string ) {
-    const json = JSON.parse(fs.readFileSync('room.json', 'utf8'));
-  
-    var arrList = json[ strNow.slice( 0,6 ) ];
+    const response = await fetch(`https://m.search.naver.com/p/csearch/content/nqapirender.nhn?${params}`)
+    const data = await response.json()
+    const document = new JSDOM(data.dataHtml).window.document
     
-    const strYear = strNow.slice( 0,4 );
-    const strMonth = strNow.slice( 4,6 );
-    const strDay = strNow.slice( 6,8 );
+    const rooms: any = [...document.querySelectorAll('.ind_program.on')].map((item, index) => {
+      const titleEl = <HTMLElement>item.querySelector('.pr_title')
+      const href = titleEl.getAttribute('href') || ''
+      const id = href.slice(1).split('&').find(q => q.startsWith('os'))
+      const timeEl = <HTMLElement>item.querySelector('.time')
+      const nextItem = item.nextElementSibling
+      const endTimeEl = nextItem ? nextItem.querySelector('.time') : null
   
-    if( DateUtils.getIsLastDay( Number( strYear ), Number( strMonth ) - 1, Number( strDay ) ) ) {
-      const nNextMonth = Number( strMonth ) + 1;
-      const next = json[ strYear + StringUtils.make00String( nNextMonth ) ];
-      if( next ) {
-        arrList.push( next );
+      return {
+        id: id ? id.replace('os=', '') : index + 1,
+        title: titleEl.innerHTML || '',
+        start_time: timeEl.innerHTML || '',
+        end_time: endTimeEl ? endTimeEl.innerHTML : '--:--'
       }
-    } else if( Number( strDay ) === 1 ) {
-      const nPrevMonth = Number( strMonth ) - 1;
-      const prev = json[ strYear + StringUtils.make00String( nPrevMonth ) ];
-      if( prev ) {
-        arrList.push( prev );
-      }
-    }
-  
-    return arrList;
-  }
-  
-  private getListForRoom( strNow: string, arrItemList: Array<IRoom> ) {
-    var arrRet = [];
-  
-    var item;
-    var startTime;
-    var endTime;
-  
-    for(var i=0; i<arrItemList.length; ++i) {
-      item = arrItemList[ i ];
-      startTime = item.start_time;
-      endTime = item.end_time;
-  
-      if( Number( startTime ) > Number( strNow ) ) {
-        continue;
-      }
-      if( Number( endTime ) < Number( strNow ) ) {
-        continue;
-      }
-  
-      // // 룸이 이미 존재 하면 그 숫자, 없으면 널.
-      // const roomById = io.sockets.adapter.rooms[ item.id ];
-      // item.connected_count = roomById ? roomById.length : null;
-  
-      arrRet.push( item );
-    }
-  
-    return arrRet;
+    })
+    
+    return rooms;
   }
 }
