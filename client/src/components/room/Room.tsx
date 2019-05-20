@@ -61,9 +61,11 @@ class Room extends Component<RouteComponentProps, IState> {
   }
 
   getData = ( roomId: string ) => {
-    const TEMP_URL: string = 'http://localhost:4001/api/room/' + roomId;
+    const ENV_HOST: string | undefined = process.env.REACT_APP_TEMP_HOST;
+    const HOST: string = ENV_HOST ? ENV_HOST : 'localhost:4001';
+    const URL: string = `http://${HOST}/api/room/${roomId}`;
 
-    fetch( TEMP_URL )
+    fetch( URL )
     .then( ( response ) => {
       return response.json();
     } ).then( ( data: any ) => {
