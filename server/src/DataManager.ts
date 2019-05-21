@@ -1,6 +1,7 @@
 import moment = require("moment");
 import { JSDOM } from "jsdom";
 import fetch from 'node-fetch'
+import IRoom from "./interfaces/IRoom";
 
 export default class DataManager {
   public async getJsonRoomsNow() {
@@ -16,23 +17,39 @@ export default class DataManager {
     const response = await fetch(`https://m.search.naver.com/p/csearch/content/nqapirender.nhn?${params}`)
     const data = await response.json()
     const document = new JSDOM(data.dataHtml).window.document
+
+    const arrProgram = [...document.querySelectorAll('.ind_program.on')];
+
+    var arrRet:Array<IRoom> = [];
     
-    const rooms: any = [...document.querySelectorAll('.ind_program.on')].map((item, index) => {
+    for( var i:number=0; i<arrProgram.length; ++i) {
+      const item: any = arrProgram[ i ];
+
+      const elSubInfoRe = <HTMLElement>item.querySelector('.sub_info .re');
+
+      if( elSubInfoRe ) continue;
+
       const titleEl = <HTMLElement>item.querySelector('.pr_title')
       const href = titleEl.getAttribute('href') || ''
       const id = href.slice(1).split('&').find(q => q.startsWith('os'))
+
+      if( !id ) continue;
+
       const timeEl = <HTMLElement>item.querySelector('.time')
       const nextItem = item.nextElementSibling
       const endTimeEl = nextItem ? nextItem.querySelector('.time') : null
-  
-      return {
-        id: id ? id.replace('os=', '') : index + 1,
+
+      const room: IRoom = {
+        id: Number( id.replace('os=', '') ),
         title: titleEl.innerHTML || '',
         start_time: timeEl.innerHTML || '',
-        end_time: endTimeEl ? endTimeEl.innerHTML : '--:--'
+        end_time: endTimeEl ? endTimeEl.innerHTML : '--:--',
+        connected_count: null
       }
-    })
-    
-    return rooms;
+
+      arrRet.push( room );
+    }
+
+    return arrRet;
   }
 }
